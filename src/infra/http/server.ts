@@ -12,6 +12,7 @@ import {
 } from 'fastify-type-provider-zod';
 import { uploadImageRoute } from './routes/upload-image';
 import { transformSwaggerSchema } from './transform-swagger-schema';
+import { getUploadsRoute } from './routes/get-uploads';
 
 const server = fastify();
 
@@ -48,6 +49,7 @@ server.register(fastifySwaggerUi, {
 });
 
 server.register(uploadImageRoute);
+server.register(getUploadsRoute);
 
 server.listen({ port: 3000, host: '0.0.0.0' }).then(() => {
   log('HTTP Server Running on');
