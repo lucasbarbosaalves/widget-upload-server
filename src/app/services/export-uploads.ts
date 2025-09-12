@@ -1,23 +1,24 @@
-import { db, pg } from '@/infra/db';
-import { schema } from '@/infra/db/schemas/ìndex';
-import { uploadFileToStorage } from '@/infra/storage/upload-file-to-storage';
-import { Either, makeRight } from '@/shared/either';
-import { stringify } from 'csv-stringify';
-import { ilike } from 'drizzle-orm';
 import { PassThrough, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import z from 'zod';
+import { db, pg } from '@/infra/db';
+import { uploadFileToStorage } from '@/infra/storage/upload-file-to-storage';
+import { stringify } from 'csv-stringify';
+import { ilike } from 'drizzle-orm';
+import { z } from 'zod';
+import { schema } from '@/infra/db/schemas/ìndex';
+import { Either, makeRight } from '@/shared/either';
 
 const exportUploadsInput = z.object({
   searchQuery: z.string().optional(),
 });
-type exportUploadsInput = z.input<typeof exportUploadsInput>;
 
-type exportUploadsOutput = {
+type ExportUploadsInput = z.input<typeof exportUploadsInput>;
+
+type ExportUploadsOutput = {
   reportUrl: string;
 };
 
-export async function exportUploads(input: exportUploadsInput): Promise<Either<never, exportUploadsOutput>> {
+export async function exportUploads(input: ExportUploadsInput): Promise<Either<never, ExportUploadsOutput>> {
   const { searchQuery } = exportUploadsInput.parse(input);
 
   const { sql, params } = db
@@ -31,21 +32,16 @@ export async function exportUploads(input: exportUploadsInput): Promise<Either<n
     .where(searchQuery ? ilike(schema.uploads.name, `%${searchQuery}%`) : undefined)
     .toSQL();
 
-  // Cursor Postgres
-  const cursor = pg.unsafe(sql, params as string[]).cursor(50);
-
-  for await (const rows of cursor) {
-    console.log(rows);
-  }
+  const cursor = pg.unsafe(sql, params as string[]).cursor(2);
 
   const csv = stringify({
     delimiter: ',',
     header: true,
     columns: [
       { key: 'id', header: 'ID' },
-      { key: 'name', header: 'NAME' },
+      { key: 'name', header: 'Name' },
       { key: 'remote_url', header: 'URL' },
-      { key: 'createdAt', header: 'Uploaded_at' },
+      { key: 'created_at', header: 'Uploaded at' },
     ],
   });
 
@@ -66,6 +62,7 @@ export async function exportUploads(input: exportUploadsInput): Promise<Either<n
     csv,
     uploadToStorageStream
   );
+
   const uploadToStorage = uploadFileToStorage({
     contentType: 'text/csv',
     folder: 'downloads',
@@ -75,7 +72,5 @@ export async function exportUploads(input: exportUploadsInput): Promise<Either<n
 
   const [{ url }] = await Promise.all([uploadToStorage, convertToCSVPipeline]);
 
-  console.log(url);
-
-  return makeRight({ reportUrl: '' });
+  return makeRight({ reportUrl: url });
 }
