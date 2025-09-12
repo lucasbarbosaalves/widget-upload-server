@@ -21,8 +21,10 @@
   "packageManager": "pnpm@10.15.1",
   "devDependencies": {
     "@biomejs/biome": "2.2.3",
+    "@faker-js/faker": "^10.0.0",
     "@types/node": "^24.3.1",
     "biome": "^0.3.3",
+    "dayjs": "^1.11.18",
     "drizzle-kit": "^0.31.4",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
