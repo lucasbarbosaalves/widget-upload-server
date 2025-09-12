@@ -19,7 +19,7 @@ const allowedFormatFiles = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp'
 export async function uploadImage(input: UploadImageInput): Promise<Either<InvalidFileFormat, { url: string }>> {
   const { contentStream, contentType, fileName } = uploadImageInput.parse(input);
 
-  if (!allowedFormatFiles) {
+  if (!allowedFormatFiles.includes(contentType)) {
     return makeLeft(new InvalidFileFormat());
   }
 
