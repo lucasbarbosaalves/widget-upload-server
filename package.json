@@ -14,7 +14,8 @@
     "db:migrate:test": "dotenv -e .env.test -- drizzle-kit migrate",
     "pretest": "pnpm run db:migrate:test",
     "pretest:watch": "pnpm run db:migrate:test",
-    "build": "tsup-node"
+    "build": "tsup-node src/infra/http/server.ts --format esm --out-dir dist/",
+    "start": "node --env-file=.env dist/server.js"
   },
   "keywords": [],
   "author": "",
