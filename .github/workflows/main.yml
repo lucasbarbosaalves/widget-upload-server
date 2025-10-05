@@ -13,17 +13,18 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+          
       - name: Setup Node.js
         id: setup-node
         uses: actions/setup-node@v5
         with:
           node-version: 20
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
 
       - name: Install dependencies
         id: install-dependencies
